@@ -145,10 +145,6 @@ namespace Final_422
 
         #region Sending Data
 
-        /// <summary>
-        /// Check for the acknowledgement flags
-        /// </summary>
-        /// <returns>True if the PIC acknowledges the command</returns>
         private bool Aknowledged()
         {
             byte flag = 0;
@@ -175,15 +171,11 @@ namespace Final_422
 
         }
 
-        /// <summary>
-        /// Send Settling Time Cycles
-        /// </summary>
-        /// <returns>Returns true if the PIC acknowledges the command</returns>
-        private bool SendCoef(byte[] coef)
+        private bool SendRun_Stop(byte flag)
         {
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x01;
-            TempFreq.Data = new List<byte>(coef);
+            TempFreq.Data = new List<byte>(flag);
             TempFreq.CreateHDLC();
             try
             {
@@ -196,26 +188,17 @@ namespace Final_422
             return Aknowledged();
         }
 
-        /// <summary>
-        /// Sends the switching variables
-        /// </summary>
-        /// <returns>Returns true if the PIC acknowledges the command</returns>
-        private bool SendStop()
+        private bool Send_Horizontal(byte hor)
         {
-            List<byte> TempData = new List<byte> { };
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x03;
-            TempFreq.Data = TempData;
+            TempFreq.Data = new List<byte>(hor);
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
         }
 
-        /// <summary>
-        /// Send Output Voltage Range Variable
-        /// </summary>
-        /// <returns>Returns true if the PIC Acknowledges</returns>
-        private bool SendStart()
+        private bool Send_Single()
         {
             List<byte> TempData = new List<byte> { };
             HDLC_tx TempFreq = new HDLC_tx();
@@ -226,67 +209,11 @@ namespace Final_422
             return Aknowledged();
         }
 
-        private bool SendPeriod(UInt16 Period)
+        private bool Send_Trigger(byte trigger)
         {
-            byte[] TempData = BitConverter.GetBytes(Globals.Period);
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x04;
-            TempFreq.Data = new List<byte>(TempData);
-            TempFreq.CreateHDLC();
-            Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
-            return Aknowledged();
-        }
-
-        private bool SendPeriod_LPF(UInt16 Period)
-        {
-            byte[] TempData = BitConverter.GetBytes(Period);
-            HDLC_tx TempFreq = new HDLC_tx();
-            TempFreq.cmd = 0x07;
-            TempFreq.Data = new List<byte>(TempData);
-            TempFreq.CreateHDLC();
-            Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
-            return Aknowledged();
-        }
-
-        private bool SendPeriod_BPF(UInt16 Period)
-        {
-            byte[] TempData = BitConverter.GetBytes(Period);
-            HDLC_tx TempFreq = new HDLC_tx();
-            TempFreq.cmd = 0x08;
-            TempFreq.Data = new List<byte>(TempData);
-            TempFreq.CreateHDLC();
-            Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
-            return Aknowledged();
-        }
-
-        private bool SendOffset()
-        {
-            byte[] TempData = BitConverter.GetBytes(Globals.offset);
-            HDLC_tx TempFreq = new HDLC_tx();
-            TempFreq.cmd = 0x05;
-            TempFreq.Data = new List<byte>(TempData);
-            TempFreq.CreateHDLC();
-            Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
-            return Aknowledged();
-        }
-
-        private bool SendScale(Byte s)
-        {
-            byte[] TempData = BitConverter.GetBytes(s);
-            HDLC_tx TempFreq = new HDLC_tx();
-            TempFreq.cmd = 0x06;
-            TempFreq.Data = new List<byte>(TempData);
-            TempFreq.CreateHDLC();
-            Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
-            return Aknowledged();
-        }
-
-        private bool Send_Write_to_GUI(byte flag)
-        {
-            byte[] TempData = BitConverter.GetBytes(flag);
-            HDLC_tx TempFreq = new HDLC_tx();
-            TempFreq.cmd = 0xFF;
-            TempFreq.Data = new List<byte>(TempData);
+            TempFreq.Data = new List<byte>(trigger);
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
@@ -398,6 +325,93 @@ namespace Final_422
         }
 
         #endregion
+
+        private void button_RunStop_Click(object sender, EventArgs e)
+        {
+            byte FailedCounter = 0;
+            if(button_RunStop.BackColor == System.Drawing.Color.LimeGreen) //If the scope is running already, stop it
+            {
+                while (!SendRun_Stop(0))
+                {
+                    FailedCounter++;
+                    if (FailedCounter >= 3)
+                    {
+                        OutputLabel.Text = ">> Sending Stop Signal Failed\n";
+                        return;
+                    }
+                }
+                button_RunStop.BackColor = System.Drawing.Color.Red;
+            }
+            else //Otherwise it needs to run
+            {
+                while (!SendRun_Stop(1))
+                {
+                    FailedCounter++;
+                    if (FailedCounter >= 3)
+                    {
+                        OutputLabel.Text = ">> Sending Start Signal Failed\n";
+                        return;
+                    }
+                }
+                button_RunStop.BackColor = System.Drawing.Color.LimeGreen;
+            }
+
+        }
+
+        private void button_single_Click(object sender, EventArgs e)
+        {
+            byte FailedCounter = 0;
+            if (button_RunStop.BackColor == System.Drawing.Color.LimeGreen) //System is continuous, must stop and prepare for single shot
+            {
+                while (!SendRun_Stop(0))
+                {
+                    FailedCounter++;
+                    if (FailedCounter >= 3)
+                    {
+                        OutputLabel.Text = ">> Sending Stop Signal Failed\n";
+                        return;
+                    }
+                }
+                button_RunStop.BackColor = System.Drawing.SystemColors.Control;
+            }
+            //Otherwise the system is already stopped
+            button_RunStop.BackColor = System.Drawing.SystemColors.Control;
+
+            //Send Single Shot command
+            FailedCounter = 0;
+            while (!Send_Single())
+            {
+                FailedCounter++;
+                if (FailedCounter >= 3)
+                {
+                    OutputLabel.Text = ">> Sending Single Signal Failed\n";
+                    return;
+                }
+            }
+        }
+
+        private void trackBar_Horizontal_Scroll(object sender, EventArgs e)
+        {
+            if(Globals.Serial.IsOpen)
+            {
+                //Find the position of the trackbar and send it to the scope
+                    byte FailedCounter = 0;
+                    while (!Send_Horizontal((byte)trackBar_Horizontal.Value))
+                    {
+                        FailedCounter++;
+                        if (FailedCounter >= 3)
+                        {
+                            OutputLabel.Text = ">> Sending Scaling Signal Failed\n";
+                            return;
+                        }
+                    }
+            }
+            else //Serial Port isnt open
+            {
+                OutputLabel.Text = ">> Need to connect to scope in order to set the horizontal scale.\n";
+            }
+
+        }
     }
 
     public class MeasureModel

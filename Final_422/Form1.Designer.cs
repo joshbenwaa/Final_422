@@ -168,21 +168,24 @@
             // 
             // button_RunStop
             // 
+            this.button_RunStop.BackColor = System.Drawing.SystemColors.Control;
             this.button_RunStop.Location = new System.Drawing.Point(6, 19);
             this.button_RunStop.Name = "button_RunStop";
             this.button_RunStop.Size = new System.Drawing.Size(75, 23);
             this.button_RunStop.TabIndex = 29;
             this.button_RunStop.Text = "Run / Stop";
-            this.button_RunStop.UseVisualStyleBackColor = true;
+            this.button_RunStop.UseVisualStyleBackColor = false;
+            this.button_RunStop.Click += new System.EventHandler(this.button_RunStop_Click);
             // 
             // button_single
             // 
-            this.button_single.Location = new System.Drawing.Point(87, 18);
+            this.button_single.Location = new System.Drawing.Point(91, 19);
             this.button_single.Name = "button_single";
             this.button_single.Size = new System.Drawing.Size(75, 23);
             this.button_single.TabIndex = 30;
             this.button_single.Text = "Single";
             this.button_single.UseVisualStyleBackColor = true;
+            this.button_single.Click += new System.EventHandler(this.button_single_Click);
             // 
             // trackBar_Vertical
             // 
@@ -194,9 +197,11 @@
             // trackBar_Horizontal
             // 
             this.trackBar_Horizontal.Location = new System.Drawing.Point(6, 19);
+            this.trackBar_Horizontal.Maximum = 9;
             this.trackBar_Horizontal.Name = "trackBar_Horizontal";
             this.trackBar_Horizontal.Size = new System.Drawing.Size(172, 45);
             this.trackBar_Horizontal.TabIndex = 32;
+            this.trackBar_Horizontal.Scroll += new System.EventHandler(this.trackBar_Horizontal_Scroll);
             // 
             // groupBox1
             // 
