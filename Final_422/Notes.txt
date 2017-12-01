@@ -1,0 +1,16 @@
+﻿Process for sending commands to PIC
+
+1. User enters the Values
+	a. Start Freq
+	b. Freq Increment
+	c. # of Increments
+	d. Output Voltage
+	e. Settling Time
+	f. Switches
+2. User starts Test
+	a. Send Output Voltage, Settling Time, and Switches
+	b. Send Calibration Sweep for that partiuclar frequency
+	c. Recieve Calibration Data
+	d. Send Test
+	e. Recieve Test
+	loop back
