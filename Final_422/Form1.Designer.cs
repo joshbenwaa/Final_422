@@ -48,8 +48,11 @@
             this.trackBar_Horizontal = new System.Windows.Forms.TrackBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox_horizontal = new System.Windows.Forms.GroupBox();
-            this.groupBox_RunControl = new System.Windows.Forms.GroupBox();
             this.button_horizontal_set = new System.Windows.Forms.Button();
+            this.groupBox_RunControl = new System.Windows.Forms.GroupBox();
+            this.trackBar_trigger = new System.Windows.Forms.TrackBar();
+            this.button_set_trigger = new System.Windows.Forms.Button();
+            this.label_trigger = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -58,6 +61,7 @@
             this.groupBox1.SuspendLayout();
             this.groupBox_horizontal.SuspendLayout();
             this.groupBox_RunControl.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_trigger)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -67,7 +71,7 @@
             this.toolStripProgressBar1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 552);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1146, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1233, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -91,7 +95,7 @@
             this.connectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1146, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1233, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -161,7 +165,7 @@
             // 
             // cartesianChart1
             // 
-            this.cartesianChart1.Location = new System.Drawing.Point(216, 32);
+            this.cartesianChart1.Location = new System.Drawing.Point(322, 27);
             this.cartesianChart1.Name = "cartesianChart1";
             this.cartesianChart1.Size = new System.Drawing.Size(899, 411);
             this.cartesianChart1.TabIndex = 28;
@@ -225,6 +229,16 @@
             this.groupBox_horizontal.TabStop = false;
             this.groupBox_horizontal.Text = "Horizontal";
             // 
+            // button_horizontal_set
+            // 
+            this.button_horizontal_set.Location = new System.Drawing.Point(119, 19);
+            this.button_horizontal_set.Name = "button_horizontal_set";
+            this.button_horizontal_set.Size = new System.Drawing.Size(75, 23);
+            this.button_horizontal_set.TabIndex = 33;
+            this.button_horizontal_set.Text = "Set";
+            this.button_horizontal_set.UseVisualStyleBackColor = true;
+            this.button_horizontal_set.Click += new System.EventHandler(this.button_horizontal_set_Click);
+            // 
             // groupBox_RunControl
             // 
             this.groupBox_RunControl.Controls.Add(this.button_RunStop);
@@ -236,21 +250,43 @@
             this.groupBox_RunControl.TabStop = false;
             this.groupBox_RunControl.Text = "Run Control";
             // 
-            // button_horizontal_set
+            // trackBar_trigger
             // 
-            this.button_horizontal_set.Location = new System.Drawing.Point(119, 19);
-            this.button_horizontal_set.Name = "button_horizontal_set";
-            this.button_horizontal_set.Size = new System.Drawing.Size(75, 23);
-            this.button_horizontal_set.TabIndex = 33;
-            this.button_horizontal_set.Text = "Set";
-            this.button_horizontal_set.UseVisualStyleBackColor = true;
-            this.button_horizontal_set.Click += new System.EventHandler(this.button_horizontal_set_Click);
+            this.trackBar_trigger.Location = new System.Drawing.Point(271, 14);
+            this.trackBar_trigger.Maximum = 255;
+            this.trackBar_trigger.Name = "trackBar_trigger";
+            this.trackBar_trigger.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.trackBar_trigger.Size = new System.Drawing.Size(45, 418);
+            this.trackBar_trigger.TabIndex = 36;
+            this.trackBar_trigger.Scroll += new System.EventHandler(this.trackBar_trigger_Scroll);
+            // 
+            // button_set_trigger
+            // 
+            this.button_set_trigger.Location = new System.Drawing.Point(178, 393);
+            this.button_set_trigger.Name = "button_set_trigger";
+            this.button_set_trigger.Size = new System.Drawing.Size(75, 23);
+            this.button_set_trigger.TabIndex = 37;
+            this.button_set_trigger.Text = "Set Trigger";
+            this.button_set_trigger.UseVisualStyleBackColor = true;
+            this.button_set_trigger.Click += new System.EventHandler(this.button_set_trigger_Click);
+            // 
+            // label_trigger
+            // 
+            this.label_trigger.AutoSize = true;
+            this.label_trigger.Location = new System.Drawing.Point(141, 398);
+            this.label_trigger.Name = "label_trigger";
+            this.label_trigger.Size = new System.Drawing.Size(13, 13);
+            this.label_trigger.TabIndex = 38;
+            this.label_trigger.Text = "0";
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1146, 574);
+            this.ClientSize = new System.Drawing.Size(1233, 574);
+            this.Controls.Add(this.label_trigger);
+            this.Controls.Add(this.button_set_trigger);
+            this.Controls.Add(this.trackBar_trigger);
             this.Controls.Add(this.groupBox_RunControl);
             this.Controls.Add(this.groupBox_horizontal);
             this.Controls.Add(this.groupBox1);
@@ -274,6 +310,7 @@
             this.groupBox_horizontal.ResumeLayout(false);
             this.groupBox_horizontal.PerformLayout();
             this.groupBox_RunControl.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_trigger)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -301,6 +338,9 @@
         private System.Windows.Forms.GroupBox groupBox_horizontal;
         private System.Windows.Forms.GroupBox groupBox_RunControl;
         private System.Windows.Forms.Button button_horizontal_set;
+        private System.Windows.Forms.TrackBar trackBar_trigger;
+        private System.Windows.Forms.Button button_set_trigger;
+        private System.Windows.Forms.Label label_trigger;
     }
 }
 
