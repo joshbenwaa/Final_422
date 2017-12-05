@@ -28,35 +28,14 @@ namespace Final_422
         public Main()
         {
             InitializeComponent();
-            Globals.Serial.ReadTimeout = -1;
-
-            var mapper = Mappers.Xy<MeasureModel>()
-                .X(model => model.SampleNum)   //use DateTime.Ticks as X
-                .Y(model => model.Value);           //use the value property as Y
+            Globals.Serial.ReadTimeout = 2147483647;
+            var mapper = Mappers.Xy<byte>()
+            .X((value, index) => index) //use the index as X
+            .Y((value, index) => value); //use the value as Y
 
             //lets save the mapper globally.
-            Charting.For<MeasureModel>(mapper);
+            Charting.For<byte>(mapper);
 
-            //the ChartValues property will store our values array
-            ChartValues1 = new ChartValues<MeasureModel>();
-            ChartValues2 = new ChartValues<MeasureModel>();
-            cartesianChart1.Series = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Values = ChartValues1,
-                    PointGeometrySize = 9,
-                    StrokeThickness = 2,
-                    Fill = System.Windows.Media.Brushes.Transparent
-                },
-                new LineSeries
-                {
-                    Values = ChartValues2,
-                    PointGeometrySize = 9,
-                    StrokeThickness = 2,
-                    Fill = System.Windows.Media.Brushes.Transparent
-                }
-            };
             cartesianChart1.AxisX.Add(new Axis
             {
                 DisableAnimations = true,
@@ -66,7 +45,8 @@ namespace Final_422
                 }
             });
             cartesianChart1.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
-            SetAxisLimits(0);
+            cartesianChart1.AxisX[0].MinValue = 0;
+            cartesianChart1.AxisX[0].MaxValue = 200;
 
         }
 
@@ -175,7 +155,7 @@ namespace Final_422
         {
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x01;
-            TempFreq.Data = new List<byte>(flag);
+            TempFreq.Data = new List<byte> { flag };
             TempFreq.CreateHDLC();
             try
             {
@@ -192,7 +172,7 @@ namespace Final_422
         {
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x03;
-            TempFreq.Data = new List<byte>(hor);
+            TempFreq.Data = new List<byte> { hor };
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
@@ -225,50 +205,66 @@ namespace Final_422
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            //Globals.Serial.ReadTimeout = -1;
+            //Globals.Serial.ReadTimeout = 2147483647;
             HDLC_Rx DataRx = new HDLC_Rx();
             List<byte> Buffer = new List<byte>();
             HDLC_Rx.DPA_RX_STATE state = new HDLC_Rx.DPA_RX_STATE();
-
+            //System.Threading.Thread.Sleep(1);
             while (backgroundWorker1.CancellationPending == false)
             {
                 DataRx = new HDLC_Rx();
                 state = new HDLC_Rx.DPA_RX_STATE();
-                byte value1 = 0, value2 = 0;
+                
                 #region Parse through Data
 
-                try
+                while (state == HDLC_Rx.DPA_RX_STATE.DPA_RX_NOERR)
                 {
-                    Buffer.Add((byte)Globals.Serial.ReadByte());
-                    //value1 = (byte)Globals.Serial.ReadByte();
-                    //value2 = (byte)Globals.Serial.ReadByte();
+                    //try
+                    //{
+                        state = DataRx.DPA_RX_Parse((byte)Globals.Serial.ReadByte());
+                    //}
+                    //catch (Exception excep)
+                    //{
+                    //    Append_Output(">> Scope failed to parse data\n>>Error: " + excep.Message +"\n");
+                    //    return;
+                    //}
                 }
-                catch
+                switch (state)
                 {
-
-                }
-                if (Buffer.Contains(0xFF))
-                {
-                    try
-                    {
-                        value1 = Buffer[Buffer.IndexOf(0xFF) - 2];
-                    }
-                    catch
-                    {
+                    case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
+                        //Was a success, add code here
+                        Plot_Series(DataRx.Data);
+                        //cartesianChart1.Series = new SeriesCollection
+                        //{
+                        //    new LineSeries
+                        //    {
+                        //        Values = new ChartValues<byte>(DataRx.Data)
+                        //    }
+                        //};
                         break;
-                    }
-                    value2 = Buffer[Buffer.IndexOf(0xFF) - 1];
-                    Buffer.RemoveRange(Buffer.IndexOf(0xFF) - 2, 3);
-                    Plot_Point(value1, value2);
-                    //System.Threading.Thread.Sleep(1);
+                    case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
+                        Append_Output(">> An error in the calibration data frame.\n"); return;
+                    case HDLC_Rx.DPA_RX_STATE.DPA_RX_CRCERR:
+                        break;
                 }
+                System.Threading.Thread.Sleep(1);
             }
             #endregion
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-
+            byte FailedCounter = 0;
+            while (!SendRun_Stop(0))
+            {
+                FailedCounter++;
+                if (FailedCounter >= 3)
+                {
+                    OutputLabel.Text = ">> Sending Stop Signal Failed\n";
+                    return;
+                }
+            }
+            button_RunStop.BackColor = System.Drawing.Color.Red;
         }
 
         #endregion
@@ -318,6 +314,22 @@ namespace Final_422
 
         }
 
+        public void Plot_Series(List<byte> values)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<List<byte> >(Plot_Series), new object[] { values });
+                return;
+            }
+            cartesianChart1.Series = new SeriesCollection
+            {
+                new LineSeries
+                {
+                    Values = new ChartValues<byte>(values)
+                }
+            };
+        }
+
         private void SetAxisLimits(int now)
         {
             cartesianChart1.AxisX[0].MaxValue = now + 1;
@@ -328,6 +340,7 @@ namespace Final_422
 
         private void button_RunStop_Click(object sender, EventArgs e)
         {
+            Globals.Serial.ReadTimeout = 2147483647;
             byte FailedCounter = 0;
             if(button_RunStop.BackColor == System.Drawing.Color.LimeGreen) //If the scope is running already, stop it
             {
@@ -339,6 +352,10 @@ namespace Final_422
                         OutputLabel.Text = ">> Sending Stop Signal Failed\n";
                         return;
                     }
+                }
+                if(backgroundWorker1.IsBusy)
+                {
+                    backgroundWorker1.CancelAsync();
                 }
                 button_RunStop.BackColor = System.Drawing.Color.Red;
             }
@@ -353,6 +370,8 @@ namespace Final_422
                         return;
                     }
                 }
+                Globals.Serial.DiscardInBuffer();
+                backgroundWorker1.RunWorkerAsync();
                 button_RunStop.BackColor = System.Drawing.Color.LimeGreen;
             }
 
@@ -392,19 +411,24 @@ namespace Final_422
 
         private void trackBar_Horizontal_Scroll(object sender, EventArgs e)
         {
-            if(Globals.Serial.IsOpen)
+        }
+
+        private void button_horizontal_set_Click(object sender, EventArgs e)
+        {
+            if (Globals.Serial.IsOpen)
             {
                 //Find the position of the trackbar and send it to the scope
-                    byte FailedCounter = 0;
-                    while (!Send_Horizontal((byte)trackBar_Horizontal.Value))
+                byte FailedCounter = 0;
+                while (!Send_Horizontal((byte)trackBar_Horizontal.Value))
+                {
+                    FailedCounter++;
+                    if (FailedCounter >= 3)
                     {
-                        FailedCounter++;
-                        if (FailedCounter >= 3)
-                        {
-                            OutputLabel.Text = ">> Sending Scaling Signal Failed\n";
-                            return;
-                        }
+                        OutputLabel.Text = ">> Sending Scaling Signal Failed\n";
+                        return;
                     }
+                }
+                OutputLabel.Text = ">>";
             }
             else //Serial Port isnt open
             {

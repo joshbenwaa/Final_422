@@ -49,6 +49,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox_horizontal = new System.Windows.Forms.GroupBox();
             this.groupBox_RunControl = new System.Windows.Forms.GroupBox();
+            this.button_horizontal_set = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -199,7 +200,7 @@
             this.trackBar_Horizontal.Location = new System.Drawing.Point(6, 19);
             this.trackBar_Horizontal.Maximum = 9;
             this.trackBar_Horizontal.Name = "trackBar_Horizontal";
-            this.trackBar_Horizontal.Size = new System.Drawing.Size(172, 45);
+            this.trackBar_Horizontal.Size = new System.Drawing.Size(107, 45);
             this.trackBar_Horizontal.TabIndex = 32;
             this.trackBar_Horizontal.Scroll += new System.EventHandler(this.trackBar_Horizontal_Scroll);
             // 
@@ -215,6 +216,7 @@
             // 
             // groupBox_horizontal
             // 
+            this.groupBox_horizontal.Controls.Add(this.button_horizontal_set);
             this.groupBox_horizontal.Controls.Add(this.trackBar_Horizontal);
             this.groupBox_horizontal.Location = new System.Drawing.Point(9, 90);
             this.groupBox_horizontal.Name = "groupBox_horizontal";
@@ -233,6 +235,16 @@
             this.groupBox_RunControl.TabIndex = 35;
             this.groupBox_RunControl.TabStop = false;
             this.groupBox_RunControl.Text = "Run Control";
+            // 
+            // button_horizontal_set
+            // 
+            this.button_horizontal_set.Location = new System.Drawing.Point(119, 19);
+            this.button_horizontal_set.Name = "button_horizontal_set";
+            this.button_horizontal_set.Size = new System.Drawing.Size(75, 23);
+            this.button_horizontal_set.TabIndex = 33;
+            this.button_horizontal_set.Text = "Set";
+            this.button_horizontal_set.UseVisualStyleBackColor = true;
+            this.button_horizontal_set.Click += new System.EventHandler(this.button_horizontal_set_Click);
             // 
             // Main
             // 
@@ -288,6 +300,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox_horizontal;
         private System.Windows.Forms.GroupBox groupBox_RunControl;
+        private System.Windows.Forms.Button button_horizontal_set;
     }
 }
 
