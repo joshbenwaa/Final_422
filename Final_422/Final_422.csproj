@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Globals.cs" />
     <Compile Include="HDLC.cs" />
+    <Compile Include="ObservableByte.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BluetoothSettings.resx">

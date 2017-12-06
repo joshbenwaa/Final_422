@@ -53,6 +53,8 @@
             this.trackBar_trigger = new System.Windows.Forms.TrackBar();
             this.button_set_trigger = new System.Windows.Forms.Button();
             this.label_trigger = new System.Windows.Forms.Label();
+            this.radioButton_rising = new System.Windows.Forms.RadioButton();
+            this.radioButton_falling = new System.Windows.Forms.RadioButton();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -279,11 +281,37 @@
             this.label_trigger.TabIndex = 38;
             this.label_trigger.Text = "0";
             // 
+            // radioButton_rising
+            // 
+            this.radioButton_rising.AutoSize = true;
+            this.radioButton_rising.Checked = true;
+            this.radioButton_rising.Location = new System.Drawing.Point(133, 421);
+            this.radioButton_rising.Name = "radioButton_rising";
+            this.radioButton_rising.Size = new System.Drawing.Size(54, 17);
+            this.radioButton_rising.TabIndex = 39;
+            this.radioButton_rising.TabStop = true;
+            this.radioButton_rising.Text = "Rising";
+            this.radioButton_rising.UseVisualStyleBackColor = true;
+            // 
+            // radioButton_falling
+            // 
+            this.radioButton_falling.AutoSize = true;
+            this.radioButton_falling.Location = new System.Drawing.Point(198, 421);
+            this.radioButton_falling.Name = "radioButton_falling";
+            this.radioButton_falling.Size = new System.Drawing.Size(55, 17);
+            this.radioButton_falling.TabIndex = 40;
+            this.radioButton_falling.TabStop = true;
+            this.radioButton_falling.Text = "Falling";
+            this.radioButton_falling.UseVisualStyleBackColor = true;
+            this.radioButton_falling.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1233, 574);
+            this.Controls.Add(this.radioButton_falling);
+            this.Controls.Add(this.radioButton_rising);
             this.Controls.Add(this.label_trigger);
             this.Controls.Add(this.button_set_trigger);
             this.Controls.Add(this.trackBar_trigger);
@@ -341,6 +369,8 @@
         private System.Windows.Forms.TrackBar trackBar_trigger;
         private System.Windows.Forms.Button button_set_trigger;
         private System.Windows.Forms.Label label_trigger;
+        private System.Windows.Forms.RadioButton radioButton_rising;
+        private System.Windows.Forms.RadioButton radioButton_falling;
     }
 }
 

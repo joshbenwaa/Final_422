@@ -12,15 +12,15 @@ using LiveCharts.Wpf; //The WPF controls
 using LiveCharts.WinForms; //the WinForm wrappers
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
+using System.Linq;
 
 namespace Final_422
 {
     public partial class Main : Form
     {
         #region Variables
-        bool chart_int = false;
         public bool connectedflag = false;
-        public ChartValues<ObservableValue> Chart_Values;
+        public ChartValues<ObservableByte> Chart_Values;
         #endregion
 
         #region Main
@@ -28,13 +28,17 @@ namespace Final_422
         public Main()
         {
             InitializeComponent();
-            Chart_Values = new ChartValues<ObservableValue>();
-            var mapper = Mappers.Xy<byte>()
+            Chart_Values = new ChartValues<ObservableByte>();
+            for(int j = 0; j < 200; j++)
+            {
+                Chart_Values.Add(new ObservableByte(0));
+            }
+            var mapper = Mappers.Xy<ObservableByte>()
             .X((value, index) => index) //use the index as X
-            .Y((value, index) => value); //use the value as Y
+            .Y((value, index) => value.Value); //use the value as Y1
 
             //lets save the mapper globally.
-            Charting.For<byte>(mapper);
+            Charting.For<ObservableByte>(mapper);
 
             cartesianChart1.AxisX.Add(new Axis
             {
@@ -43,6 +47,11 @@ namespace Final_422
                 {
                     Step = 10
                 }
+            });
+
+            cartesianChart1.Series.Add(new LineSeries
+            {
+                Values = Chart_Values
             });
             cartesianChart1.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
             cartesianChart1.AxisX[0].MinValue = 0;
@@ -56,7 +65,6 @@ namespace Final_422
             });
             cartesianChart1.AxisY[0].MinValue = 0;
             cartesianChart1.AxisY[0].MaxValue = 255;
-            chart_int = true;
 
         }
 
@@ -199,11 +207,11 @@ namespace Final_422
             return Aknowledged();
         }
 
-        private bool Send_Trigger(byte trigger)
+        private bool Send_Trigger(byte trigger, byte Rising_Falling)
         {
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x04;
-            TempFreq.Data = new List<byte>(trigger);
+            TempFreq.Data = new List<byte>() { trigger, Rising_Falling};
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
@@ -214,6 +222,10 @@ namespace Final_422
             List<byte> TempData = new List<byte> { };
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x05;
+            if(radioButton_falling.Checked)
+            {
+                TempFreq.cmd = 0x06;
+            }
             TempFreq.Data = TempData;
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
@@ -226,7 +238,7 @@ namespace Final_422
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            //Globals.Serial.ReadTimeout = 2147483647;
+            Globals.Serial.ReadTimeout = 1000;
             byte FailedCounter = 0;
             HDLC_Rx DataRx = new HDLC_Rx();
             List<byte> Buffer = new List<byte>();
@@ -258,14 +270,15 @@ namespace Final_422
                     }
                     catch (Exception excep)
                     {
-                        Append_Output(">> Scope failed to parse data\n>>Error: " + excep.Message + "\n");
-                        return;
+                        Replace_Output(">> trig'd?\n");
+                        break;
                     }
                 }
                 switch (state)
                 {
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
                         //Was a success, add code here
+                        Replace_Output(">> trig'd\n");
                         Plot_Series(DataRx.Data);
                         break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
@@ -289,6 +302,8 @@ namespace Final_422
                     return;
                 }
             }
+            Globals.Serial.DiscardInBuffer();
+            OutputLabel.Text = ">> Stopped.\n";
             button_RunStop.BackColor = System.Drawing.Color.Red;
         }
 
@@ -306,23 +321,28 @@ namespace Final_422
             OutputLabel.Text += value;
         }
 
-        public void Plot_Series(List<ObservableValue> values)
+        public void Replace_Output(string value)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<List<ObservableValue>>(Plot_Series), new object[] { values });
+                this.Invoke(new Action<string>(Replace_Output), new object[] { value });
                 return;
             }
-            //cartesianChart1.Series = new SeriesCollection
-            //{
-            //    new LineSeries
-            //    {
-            //        Values = new ChartValues<byte>(values)
-            //    }
-            //};
+            OutputLabel.Text = value;
+        }
 
-            Chart_Values = new ChartValues<ObservableValue>(values);
-           
+        public void Plot_Series(List<byte> values)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<List<byte>>(Plot_Series), new object[] { values });
+                return;
+            }
+
+            for(int i = 0; i < values.Count; i++)
+            {
+                Chart_Values[i] = new ObservableByte(values[i]);
+            }
         }
 
         private void SetAxisLimits(int now)
@@ -343,6 +363,7 @@ namespace Final_422
                     backgroundWorker1.CancelAsync();
                 }
                 button_RunStop.BackColor = System.Drawing.Color.Red;
+                OutputLabel.Text = ">> Scope is stopped.\n";
             }
             else //Otherwise it needs to run
             {
@@ -435,7 +456,7 @@ namespace Final_422
                         return;
                     }
                 }
-                OutputLabel.Text = ">>";
+                OutputLabel.Text = ">> Horizontal Scale Set to " + trackBar_Horizontal.Value.ToString() + "\n";
             }
             else //Serial Port isnt open
             {
@@ -446,11 +467,17 @@ namespace Final_422
 
         private void button_set_trigger_Click(object sender, EventArgs e)
         {
+            Globals.Serial.ReadTimeout = -1;
             if (Globals.Serial.IsOpen)
             {
+                byte Rising_Falling = 1;
+                if(radioButton_falling.Checked)
+                {
+                    Rising_Falling = 0;
+                }
                 //Find the position of the trackbar and send it to the scope
                 byte FailedCounter = 0;
-                while (!Send_Horizontal((byte)trackBar_trigger.Value))
+                while (!Send_Trigger((byte)trackBar_trigger.Value, Rising_Falling))
                 {
                     FailedCounter++;
                     if (FailedCounter >= 3)
@@ -459,7 +486,7 @@ namespace Final_422
                         return;
                     }
                 }
-                OutputLabel.Text = ">>";
+                OutputLabel.Text = ">> Trigger Set to " + trackBar_trigger.Value.ToString() + "\n";
             }
             else //Serial Port isnt open
             {
@@ -470,6 +497,11 @@ namespace Final_422
         private void trackBar_trigger_Scroll(object sender, EventArgs e)
         {
             label_trigger.Text = trackBar_trigger.Value.ToString();
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 
