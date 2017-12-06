@@ -11,14 +11,16 @@ using LiveCharts; //Core of the library
 using LiveCharts.Wpf; //The WPF controls
 using LiveCharts.WinForms; //the WinForm wrappers
 using LiveCharts.Configurations;
+using LiveCharts.Defaults;
 
 namespace Final_422
 {
     public partial class Main : Form
     {
         #region Variables
-
+        bool chart_int = false;
         public bool connectedflag = false;
+        public ChartValues<ObservableValue> Chart_Values;
         #endregion
 
         #region Main
@@ -26,7 +28,7 @@ namespace Final_422
         public Main()
         {
             InitializeComponent();
-            Globals.Serial.ReadTimeout = 2147483647;
+            Chart_Values = new ChartValues<ObservableValue>();
             var mapper = Mappers.Xy<byte>()
             .X((value, index) => index) //use the index as X
             .Y((value, index) => value); //use the value as Y
@@ -54,6 +56,7 @@ namespace Final_422
             });
             cartesianChart1.AxisY[0].MinValue = 0;
             cartesianChart1.AxisY[0].MaxValue = 255;
+            chart_int = true;
 
         }
 
@@ -229,19 +232,11 @@ namespace Final_422
             List<byte> Buffer = new List<byte>();
             HDLC_Rx.DPA_RX_STATE state = new HDLC_Rx.DPA_RX_STATE();
             //System.Threading.Thread.Sleep(1);
+
             while (backgroundWorker1.CancellationPending == false)
             {
                 DataRx = new HDLC_Rx();
                 state = new HDLC_Rx.DPA_RX_STATE();
-                while (!Send_Single())
-                {
-                    FailedCounter++;
-                    if (FailedCounter >= 3)
-                    {
-                        Append_Output(">> Sending Single Shot Signal Failed\n");
-                        return;
-                    }
-                }
                 Globals.Serial.DiscardInBuffer();
                 while (!Send_RequestData())
                 {
@@ -311,20 +306,23 @@ namespace Final_422
             OutputLabel.Text += value;
         }
 
-        public void Plot_Series(List<byte> values)
+        public void Plot_Series(List<ObservableValue> values)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<List<byte>>(Plot_Series), new object[] { values });
+                this.Invoke(new Action<List<ObservableValue>>(Plot_Series), new object[] { values });
                 return;
             }
-            cartesianChart1.Series = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Values = new ChartValues<byte>(values)
-                }
-            };
+            //cartesianChart1.Series = new SeriesCollection
+            //{
+            //    new LineSeries
+            //    {
+            //        Values = new ChartValues<byte>(values)
+            //    }
+            //};
+
+            Chart_Values = new ChartValues<ObservableValue>(values);
+           
         }
 
         private void SetAxisLimits(int now)
