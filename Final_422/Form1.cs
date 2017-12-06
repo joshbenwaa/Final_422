@@ -467,6 +467,11 @@ namespace Final_422
 
         private void button_set_trigger_Click(object sender, EventArgs e)
         {
+            if(button_RunStop.BackColor == System.Drawing.Color.LimeGreen)
+            {
+                OutputLabel.Text = ">> Please turn Scope of first.\n";
+                return;
+            }
             Globals.Serial.ReadTimeout = -1;
             if (Globals.Serial.IsOpen)
             {
