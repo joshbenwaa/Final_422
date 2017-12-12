@@ -219,7 +219,7 @@ namespace Final_422
 
         private bool Send_RequestData()
         {
-            List<byte> TempData = new List<byte> { };
+            List<byte> TempData = new List<byte> { Globals.Trigger };
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x05;
             if(radioButton_falling.Checked)
@@ -238,7 +238,7 @@ namespace Final_422
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            Globals.Serial.ReadTimeout = 1000;
+            Globals.Serial.ReadTimeout = 2000;
             byte FailedCounter = 0;
             HDLC_Rx DataRx = new HDLC_Rx();
             List<byte> Buffer = new List<byte>();
@@ -256,7 +256,7 @@ namespace Final_422
                     if (FailedCounter >= 3)
                     {
                         Append_Output(">> Sending Request For Data Failed\n");
-                        return;
+                        break;
                     }
                 }
 
@@ -279,10 +279,11 @@ namespace Final_422
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
                         //Was a success, add code here
                         Replace_Output(">> trig'd\n");
-                        Plot_Series(DataRx.Data);
+                        Plot_Series(DataRx.Data.GetRange(0,200));
+                        Update_SamplingFreqLabel(BitConverter.ToUInt16(DataRx.Data.GetRange(200, 2).ToArray(), 0));
                         break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
-                        Append_Output(">> An error in the calibration data frame.\n"); return;
+                        Append_Output(">> An error in the calibration data frame.\n"); break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_CRCERR:
                         break;
                 }
@@ -343,6 +344,17 @@ namespace Final_422
             {
                 Chart_Values[i] = new ObservableByte(values[i]);
             }
+        }
+
+        public void Update_SamplingFreqLabel(UInt16 value)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<UInt16>(Update_SamplingFreqLabel), new object[] { value });
+                return;
+            }
+            double SF = ((1.0 / ((double)value / 200.0)) * 70000000.0);
+            label_SamplingFreq.Text = "Sampling Frequency: " + SF.ToString() + " hz";
         }
 
         private void SetAxisLimits(int now)
@@ -502,6 +514,7 @@ namespace Final_422
         private void trackBar_trigger_Scroll(object sender, EventArgs e)
         {
             label_trigger.Text = trackBar_trigger.Value.ToString();
+            Globals.Trigger = (byte)trackBar_trigger.Value;
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)

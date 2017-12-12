@@ -13,6 +13,8 @@ namespace Final_422
     public class Globals
     {
 
+        public static byte Trigger = new byte();
+        public static Int16 NumOfSamples = new short();
         public static UInt16 Period = 0;
 
         public static Byte offset = 0;

@@ -55,6 +55,7 @@
             this.label_trigger = new System.Windows.Forms.Label();
             this.radioButton_rising = new System.Windows.Forms.RadioButton();
             this.radioButton_falling = new System.Windows.Forms.RadioButton();
+            this.label_SamplingFreq = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -305,11 +306,21 @@
             this.radioButton_falling.UseVisualStyleBackColor = true;
             this.radioButton_falling.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
+            // label_SamplingFreq
+            // 
+            this.label_SamplingFreq.AutoSize = true;
+            this.label_SamplingFreq.Location = new System.Drawing.Point(724, 464);
+            this.label_SamplingFreq.Name = "label_SamplingFreq";
+            this.label_SamplingFreq.Size = new System.Drawing.Size(35, 13);
+            this.label_SamplingFreq.TabIndex = 41;
+            this.label_SamplingFreq.Text = "label1";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1233, 574);
+            this.Controls.Add(this.label_SamplingFreq);
             this.Controls.Add(this.radioButton_falling);
             this.Controls.Add(this.radioButton_rising);
             this.Controls.Add(this.label_trigger);
@@ -371,6 +382,7 @@
         private System.Windows.Forms.Label label_trigger;
         private System.Windows.Forms.RadioButton radioButton_rising;
         private System.Windows.Forms.RadioButton radioButton_falling;
+        private System.Windows.Forms.Label label_SamplingFreq;
     }
 }
 
