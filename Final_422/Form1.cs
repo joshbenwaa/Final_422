@@ -13,6 +13,7 @@ using LiveCharts.WinForms; //the WinForm wrappers
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using System.Linq;
+using AForge;
 
 namespace Final_422
 {
@@ -29,6 +30,7 @@ namespace Final_422
         {
             InitializeComponent();
             Chart_Values = new ChartValues<ObservableByte>();
+            DFT_Values = new ChartValues<ObservableValue>();
             for(int j = 0; j < 200; j++)
             {
                 Chart_Values.Add(new ObservableByte(0));

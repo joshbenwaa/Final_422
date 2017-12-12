@@ -56,6 +56,8 @@
             this.radioButton_rising = new System.Windows.Forms.RadioButton();
             this.radioButton_falling = new System.Windows.Forms.RadioButton();
             this.label_SamplingFreq = new System.Windows.Forms.Label();
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
+            this.cartesianChart_DFT = new LiveCharts.WinForms.CartesianChart();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -72,9 +74,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.BlutoothStatusLabel,
             this.toolStripProgressBar1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 552);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 675);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1233, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1336, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -98,7 +100,7 @@
             this.connectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1233, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1336, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -170,7 +172,7 @@
             // 
             this.cartesianChart1.Location = new System.Drawing.Point(322, 27);
             this.cartesianChart1.Name = "cartesianChart1";
-            this.cartesianChart1.Size = new System.Drawing.Size(899, 411);
+            this.cartesianChart1.Size = new System.Drawing.Size(512, 192);
             this.cartesianChart1.TabIndex = 28;
             this.cartesianChart1.Text = "cartesianChart1";
             // 
@@ -259,8 +261,9 @@
             this.trackBar_trigger.Maximum = 255;
             this.trackBar_trigger.Name = "trackBar_trigger";
             this.trackBar_trigger.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.trackBar_trigger.Size = new System.Drawing.Size(45, 418);
+            this.trackBar_trigger.Size = new System.Drawing.Size(45, 192);
             this.trackBar_trigger.TabIndex = 36;
+            this.trackBar_trigger.TickFrequency = 8;
             this.trackBar_trigger.Scroll += new System.EventHandler(this.trackBar_trigger_Scroll);
             // 
             // button_set_trigger
@@ -309,17 +312,26 @@
             // label_SamplingFreq
             // 
             this.label_SamplingFreq.AutoSize = true;
-            this.label_SamplingFreq.Location = new System.Drawing.Point(724, 464);
+            this.label_SamplingFreq.Location = new System.Drawing.Point(362, 9);
             this.label_SamplingFreq.Name = "label_SamplingFreq";
             this.label_SamplingFreq.Size = new System.Drawing.Size(35, 13);
             this.label_SamplingFreq.TabIndex = 41;
             this.label_SamplingFreq.Text = "label1";
             // 
+            // cartesianChart_DFT
+            // 
+            this.cartesianChart_DFT.Location = new System.Drawing.Point(322, 225);
+            this.cartesianChart_DFT.Name = "cartesianChart_DFT";
+            this.cartesianChart_DFT.Size = new System.Drawing.Size(512, 166);
+            this.cartesianChart_DFT.TabIndex = 42;
+            this.cartesianChart_DFT.Text = "cartesianChart2";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1233, 574);
+            this.ClientSize = new System.Drawing.Size(1336, 697);
+            this.Controls.Add(this.cartesianChart_DFT);
             this.Controls.Add(this.label_SamplingFreq);
             this.Controls.Add(this.radioButton_falling);
             this.Controls.Add(this.radioButton_rising);
@@ -383,6 +395,8 @@
         private System.Windows.Forms.RadioButton radioButton_rising;
         private System.Windows.Forms.RadioButton radioButton_falling;
         private System.Windows.Forms.Label label_SamplingFreq;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
+        private LiveCharts.WinForms.CartesianChart cartesianChart_DFT;
     }
 }
 
