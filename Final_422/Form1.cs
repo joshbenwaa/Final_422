@@ -22,26 +22,35 @@ namespace Final_422
         #region Variables
         public bool connectedflag = false;
         public ChartValues<ObservableByte> Chart_Values;
+        public ChartValues<ObservablePoint> DFT_Values;
         #endregion
 
         #region Main
 
         public Main()
         {
+
             InitializeComponent();
             Chart_Values = new ChartValues<ObservableByte>();
-            DFT_Values = new ChartValues<ObservableValue>();
+            DFT_Values = new ChartValues<ObservablePoint>();
             for(int j = 0; j < 200; j++)
             {
                 Chart_Values.Add(new ObservableByte(0));
             }
+            for(int k = 0; k < 9; k++)
+            {
+                DFT_Values.Add(new ObservablePoint(k,0));
+            }
             var mapper = Mappers.Xy<ObservableByte>()
             .X((value, index) => index) //use the index as X
             .Y((value, index) => value.Value); //use the value as Y1
+            var DFT_mapper = Mappers.Xy<ObservablePoint>()
+            .X((value, index) => value.X) //use the index as X
+            .Y((value, index) => value.Y); //use the value as Y1
 
             //lets save the mapper globally.
             Charting.For<ObservableByte>(mapper);
-
+            Charting.For<ObservablePoint>(DFT_mapper);
             cartesianChart1.AxisX.Add(new Axis
             {
                 DisableAnimations = true,
@@ -49,6 +58,17 @@ namespace Final_422
                 {
                     Step = 10
                 }
+            });
+
+            cartesianChart_DFT.AxisX.Add(new Axis
+            {
+                Separator = new Separator // force the separator step to 1, so it always display all labels
+                {
+                    Step = 1,
+                    IsEnabled = false //disable it to make it invisible.
+                },
+                DisableAnimations = true,
+                LabelFormatter = value => String.Format("{0,6}", value.ToString())
             });
 
             cartesianChart1.Series.Add(new LineSeries
@@ -67,6 +87,13 @@ namespace Final_422
             });
             cartesianChart1.AxisY[0].MinValue = 0;
             cartesianChart1.AxisY[0].MaxValue = 255;
+
+            cartesianChart_DFT.Series.Add(new ColumnSeries
+            {
+                Values = DFT_Values
+                
+            });
+            cartesianChart_DFT.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
 
         }
 
@@ -283,6 +310,7 @@ namespace Final_422
                         Replace_Output(">> trig'd\n");
                         Plot_Series(DataRx.Data.GetRange(0,200));
                         Update_SamplingFreqLabel(BitConverter.ToUInt16(DataRx.Data.GetRange(200, 2).ToArray(), 0));
+                        Calc_And_Plot_DFT(DataRx.Data.GetRange(0, 200));
                         break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
                         Append_Output(">> An error in the calibration data frame.\n"); break;
@@ -355,8 +383,8 @@ namespace Final_422
                 this.Invoke(new Action<UInt16>(Update_SamplingFreqLabel), new object[] { value });
                 return;
             }
-            double SF = ((1.0 / ((double)value / 200.0)) * 70000000.0);
-            label_SamplingFreq.Text = "Sampling Frequency: " + SF.ToString() + " hz";
+            Globals.SamplingFreq = ((1.0 / ((double)value / 200.0)) * 70000000.0);
+            label_SamplingFreq.Text = "Sampling Frequency: " + Globals.SamplingFreq.ToString() + " hz";
         }
 
         private void SetAxisLimits(int now)
@@ -522,6 +550,36 @@ namespace Final_422
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Calc_And_Plot_DFT(List<byte> values)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<List<byte>>(Calc_And_Plot_DFT), new object[] { values });
+                return;
+            }
+            byte[] values_Array = values.ToArray();
+            double[] Input = new double[values.Count + 2];
+            double[] FreqScale = MathNet.Numerics.IntegralTransforms.Fourier.FrequencyScale(200, Globals.SamplingFreq);
+            string[] FreqScale_labels = new string[FreqScale.Length];
+            for(int i = 0; i < FreqScale.Length; i++)
+            {
+                FreqScale_labels[i] = FreqScale[i].ToString("F");
+            }
+            MathNet.Numerics.Complex32[] complex32 = new MathNet.Numerics.Complex32[200];
+            for(int i = 0; i < 200; i++)
+            {
+                complex32[i] =  new MathNet.Numerics.Complex32( Convert.ToSingle((values_Array[i])),0);
+            }
+            
+            MathNet.Numerics.IntegralTransforms.Fourier.Forward(complex32,MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
+
+            for (int i = 0; i < 9; i++)
+            {
+                DFT_Values[i] = new ObservablePoint(i ,complex32[i].Magnitude);
+            }
+            cartesianChart_DFT.AxisX[0].Labels = FreqScale_labels;
         }
     }
 

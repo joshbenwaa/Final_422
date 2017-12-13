@@ -13,7 +13,7 @@ namespace Final_422
     /// </summary>
     public class Globals
     {
-
+        public static double SamplingFreq = new double();
         public static byte Trigger = new byte();
         public static Int16 NumOfSamples = new short();
         public static UInt16 Period = 0;
