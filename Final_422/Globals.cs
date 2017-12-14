@@ -13,6 +13,7 @@ namespace Final_422
     /// </summary>
     public class Globals
     {
+        public static float Vert_offset = new float();
         public static double SamplingFreq = new double();
         public static byte Trigger = new byte();
         public static Int16 NumOfSamples = new short();

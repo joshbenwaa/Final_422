@@ -58,6 +58,12 @@
             this.label_SamplingFreq = new System.Windows.Forms.Label();
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.cartesianChart_DFT = new LiveCharts.WinForms.CartesianChart();
+            this.cartesianChart_phase = new LiveCharts.WinForms.CartesianChart();
+            this.groupBox_measurements = new System.Windows.Forms.GroupBox();
+            this.label_Freq = new System.Windows.Forms.Label();
+            this.label_Vpp = new System.Windows.Forms.Label();
+            this.label_phase = new System.Windows.Forms.Label();
+            this.trackBar_scale = new System.Windows.Forms.TrackBar();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -67,6 +73,8 @@
             this.groupBox_horizontal.SuspendLayout();
             this.groupBox_RunControl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_trigger)).BeginInit();
+            this.groupBox_measurements.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_scale)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -147,7 +155,7 @@
             this.OutputGroupBox.Controls.Add(this.OutputLabel);
             this.OutputGroupBox.Location = new System.Drawing.Point(9, 449);
             this.OutputGroupBox.Name = "OutputGroupBox";
-            this.OutputGroupBox.Size = new System.Drawing.Size(698, 100);
+            this.OutputGroupBox.Size = new System.Drawing.Size(546, 223);
             this.OutputGroupBox.TabIndex = 9;
             this.OutputGroupBox.TabStop = false;
             this.OutputGroupBox.Text = "Output";
@@ -172,7 +180,7 @@
             // 
             this.cartesianChart1.Location = new System.Drawing.Point(322, 27);
             this.cartesianChart1.Name = "cartesianChart1";
-            this.cartesianChart1.Size = new System.Drawing.Size(512, 192);
+            this.cartesianChart1.Size = new System.Drawing.Size(933, 192);
             this.cartesianChart1.TabIndex = 28;
             this.cartesianChart1.Text = "cartesianChart1";
             // 
@@ -200,9 +208,12 @@
             // trackBar_Vertical
             // 
             this.trackBar_Vertical.Location = new System.Drawing.Point(6, 19);
+            this.trackBar_Vertical.Minimum = 1;
             this.trackBar_Vertical.Name = "trackBar_Vertical";
             this.trackBar_Vertical.Size = new System.Drawing.Size(172, 45);
             this.trackBar_Vertical.TabIndex = 31;
+            this.trackBar_Vertical.Value = 1;
+            this.trackBar_Vertical.Scroll += new System.EventHandler(this.trackBar_Vertical_Scroll);
             // 
             // trackBar_Horizontal
             // 
@@ -322,15 +333,76 @@
             // 
             this.cartesianChart_DFT.Location = new System.Drawing.Point(322, 225);
             this.cartesianChart_DFT.Name = "cartesianChart_DFT";
-            this.cartesianChart_DFT.Size = new System.Drawing.Size(512, 166);
+            this.cartesianChart_DFT.Size = new System.Drawing.Size(419, 166);
             this.cartesianChart_DFT.TabIndex = 42;
             this.cartesianChart_DFT.Text = "cartesianChart2";
+            // 
+            // cartesianChart_phase
+            // 
+            this.cartesianChart_phase.Location = new System.Drawing.Point(758, 247);
+            this.cartesianChart_phase.Name = "cartesianChart_phase";
+            this.cartesianChart_phase.Size = new System.Drawing.Size(497, 144);
+            this.cartesianChart_phase.TabIndex = 43;
+            this.cartesianChart_phase.Text = "cartesianChart_phase";
+            // 
+            // groupBox_measurements
+            // 
+            this.groupBox_measurements.Controls.Add(this.label_phase);
+            this.groupBox_measurements.Controls.Add(this.label_Freq);
+            this.groupBox_measurements.Controls.Add(this.label_Vpp);
+            this.groupBox_measurements.Location = new System.Drawing.Point(1066, 449);
+            this.groupBox_measurements.Name = "groupBox_measurements";
+            this.groupBox_measurements.Size = new System.Drawing.Size(189, 67);
+            this.groupBox_measurements.TabIndex = 44;
+            this.groupBox_measurements.TabStop = false;
+            this.groupBox_measurements.Text = "Measurements";
+            // 
+            // label_Freq
+            // 
+            this.label_Freq.AutoSize = true;
+            this.label_Freq.Location = new System.Drawing.Point(17, 33);
+            this.label_Freq.Name = "label_Freq";
+            this.label_Freq.Size = new System.Drawing.Size(69, 13);
+            this.label_Freq.TabIndex = 1;
+            this.label_Freq.Text = "Frequency = ";
+            // 
+            // label_Vpp
+            // 
+            this.label_Vpp.AutoSize = true;
+            this.label_Vpp.Location = new System.Drawing.Point(17, 20);
+            this.label_Vpp.Name = "label_Vpp";
+            this.label_Vpp.Size = new System.Drawing.Size(35, 13);
+            this.label_Vpp.TabIndex = 0;
+            this.label_Vpp.Text = "Vpp =";
+            // 
+            // label_phase
+            // 
+            this.label_phase.AutoSize = true;
+            this.label_phase.Location = new System.Drawing.Point(17, 46);
+            this.label_phase.Name = "label_phase";
+            this.label_phase.Size = new System.Drawing.Size(49, 13);
+            this.label_phase.TabIndex = 2;
+            this.label_phase.Text = "Phase = ";
+            // 
+            // trackBar_scale
+            // 
+            this.trackBar_scale.Location = new System.Drawing.Point(220, 55);
+            this.trackBar_scale.Maximum = 8;
+            this.trackBar_scale.Minimum = 1;
+            this.trackBar_scale.Name = "trackBar_scale";
+            this.trackBar_scale.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.trackBar_scale.Size = new System.Drawing.Size(45, 104);
+            this.trackBar_scale.TabIndex = 45;
+            this.trackBar_scale.Value = 1;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1336, 697);
+            this.Controls.Add(this.trackBar_scale);
+            this.Controls.Add(this.groupBox_measurements);
+            this.Controls.Add(this.cartesianChart_phase);
             this.Controls.Add(this.cartesianChart_DFT);
             this.Controls.Add(this.label_SamplingFreq);
             this.Controls.Add(this.radioButton_falling);
@@ -362,6 +434,9 @@
             this.groupBox_horizontal.PerformLayout();
             this.groupBox_RunControl.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_trigger)).EndInit();
+            this.groupBox_measurements.ResumeLayout(false);
+            this.groupBox_measurements.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_scale)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -397,6 +472,12 @@
         private System.Windows.Forms.Label label_SamplingFreq;
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private LiveCharts.WinForms.CartesianChart cartesianChart_DFT;
+        private LiveCharts.WinForms.CartesianChart cartesianChart_phase;
+        private System.Windows.Forms.GroupBox groupBox_measurements;
+        private System.Windows.Forms.Label label_Vpp;
+        private System.Windows.Forms.Label label_Freq;
+        private System.Windows.Forms.Label label_phase;
+        private System.Windows.Forms.TrackBar trackBar_scale;
     }
 }
 

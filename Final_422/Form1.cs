@@ -23,6 +23,7 @@ namespace Final_422
         public bool connectedflag = false;
         public ChartValues<ObservableByte> Chart_Values;
         public ChartValues<ObservablePoint> DFT_Values;
+        public ChartValues<ObservablePoint> Phase_Values;
         #endregion
 
         #region Main
@@ -33,13 +34,18 @@ namespace Final_422
             InitializeComponent();
             Chart_Values = new ChartValues<ObservableByte>();
             DFT_Values = new ChartValues<ObservablePoint>();
-            for(int j = 0; j < 200; j++)
+            Phase_Values = new ChartValues<ObservablePoint>();
+            for (int j = 0; j < 200; j++)
             {
                 Chart_Values.Add(new ObservableByte(0));
             }
-            for(int k = 0; k < 9; k++)
+            for (int k = 0; k < 9; k++)
             {
-                DFT_Values.Add(new ObservablePoint(k,0));
+                DFT_Values.Add(new ObservablePoint(k, 0));
+            }
+            for (int i = 0; i < 200; i++)
+            {
+                Phase_Values.Add(new ObservablePoint(i, 0));
             }
             var mapper = Mappers.Xy<ObservableByte>()
             .X((value, index) => index) //use the index as X
@@ -71,9 +77,21 @@ namespace Final_422
                 LabelFormatter = value => String.Format("{0,6}", value.ToString())
             });
 
+            cartesianChart_phase.AxisX.Add(new Axis
+            {
+                Separator = new Separator // force the separator step to 1, so it always display all labels
+                {
+                    Step = 1,
+                    IsEnabled = false //disable it to make it invisible.
+                },
+                DisableAnimations = true,
+            });
+
             cartesianChart1.Series.Add(new LineSeries
             {
-                Values = Chart_Values
+                Fill = System.Windows.Media.Brushes.Transparent,
+                Values = Chart_Values,
+                Title = "Measurement"
             });
             cartesianChart1.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
             cartesianChart1.AxisX[0].MinValue = 0;
@@ -90,10 +108,21 @@ namespace Final_422
 
             cartesianChart_DFT.Series.Add(new ColumnSeries
             {
-                Values = DFT_Values
-                
+                Values = DFT_Values,
+                Title = "Magnitude"
             });
             cartesianChart_DFT.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
+
+            cartesianChart_phase.Series.Add(new LineSeries
+            {
+                Values = Phase_Values,
+                PointGeometry = null,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                Title = "Phase"
+
+
+            });
+            cartesianChart_phase.AnimationsSpeed = TimeSpan.FromMilliseconds(.1);
 
         }
 
@@ -240,7 +269,7 @@ namespace Final_422
         {
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x04;
-            TempFreq.Data = new List<byte>() { trigger, Rising_Falling};
+            TempFreq.Data = new List<byte>() { trigger, Rising_Falling };
             TempFreq.CreateHDLC();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
@@ -251,7 +280,7 @@ namespace Final_422
             List<byte> TempData = new List<byte> { Globals.Trigger };
             HDLC_tx TempFreq = new HDLC_tx();
             TempFreq.cmd = 0x05;
-            if(radioButton_falling.Checked)
+            if (radioButton_falling.Checked)
             {
                 TempFreq.cmd = 0x06;
             }
@@ -290,7 +319,7 @@ namespace Final_422
                 }
 
                 #region Parse through Data
-                
+
                 while (state == HDLC_Rx.DPA_RX_STATE.DPA_RX_NOERR)
                 {
                     try
@@ -308,7 +337,7 @@ namespace Final_422
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
                         //Was a success, add code here
                         Replace_Output(">> trig'd\n");
-                        Plot_Series(DataRx.Data.GetRange(0,200));
+                        Plot_Series(DataRx.Data.GetRange(0, 200));
                         Update_SamplingFreqLabel(BitConverter.ToUInt16(DataRx.Data.GetRange(200, 2).ToArray(), 0));
                         Calc_And_Plot_DFT(DataRx.Data.GetRange(0, 200));
                         break;
@@ -370,7 +399,7 @@ namespace Final_422
                 return;
             }
 
-            for(int i = 0; i < values.Count; i++)
+            for (int i = 0; i < values.Count; i++)
             {
                 Chart_Values[i] = new ObservableByte(values[i]);
             }
@@ -419,39 +448,27 @@ namespace Final_422
         private void button_single_Click(object sender, EventArgs e)
         {
             byte FailedCounter = 0;
-            if (button_RunStop.BackColor == System.Drawing.Color.LimeGreen) //System is continuous, must stop and prepare for single shot
-            {
-                button_RunStop.BackColor = System.Drawing.SystemColors.Control;
-            }
             //Otherwise the system is already stopped
             button_RunStop.BackColor = System.Drawing.SystemColors.Control;
+            button_single.BackColor = System.Drawing.Color.Yellow;
             HDLC_Rx DataRx = new HDLC_Rx();
             List<byte> Buffer = new List<byte>();
             HDLC_Rx.DPA_RX_STATE state = new HDLC_Rx.DPA_RX_STATE();
-            while (backgroundWorker1.CancellationPending == false)
+            DataRx = new HDLC_Rx();
+            state = new HDLC_Rx.DPA_RX_STATE();
+            Globals.Serial.DiscardInBuffer();
+            bool success = false;
+            while (success == false)
             {
-                DataRx = new HDLC_Rx();
-                state = new HDLC_Rx.DPA_RX_STATE();
-                while (!Send_Single())
-                {
-                    FailedCounter++;
-                    if (FailedCounter >= 3)
-                    {
-                        OutputLabel.Text = ">> Sending Single Shot Signal Failed\n";
-                        return;
-                    }
-                }
-
                 while (!Send_RequestData())
                 {
                     FailedCounter++;
                     if (FailedCounter >= 3)
                     {
-                        OutputLabel.Text = ">> Sending Request For Data Failed\n";
-                        return;
+                        Append_Output(">> Sending Request For Data Failed\n");
+                        break;
                     }
                 }
-
 
                 while (state == HDLC_Rx.DPA_RX_STATE.DPA_RX_NOERR)
                 {
@@ -461,22 +478,29 @@ namespace Final_422
                     }
                     catch (Exception excep)
                     {
-                        Append_Output(">> Scope failed to parse data\n>>Error: " + excep.Message + "\n");
-                        return;
+                        Replace_Output(">> trig'd?\n");
+                        break;
                     }
                 }
                 switch (state)
                 {
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
                         //Was a success, add code here
-                        Plot_Series(DataRx.Data);
+                        Replace_Output(">> trig'd\n");
+                        Plot_Series(DataRx.Data.GetRange(0, 200));
+                        Update_SamplingFreqLabel(BitConverter.ToUInt16(DataRx.Data.GetRange(200, 2).ToArray(), 0));
+                        Calc_And_Plot_DFT(DataRx.Data.GetRange(0, 200));
+                        button_single.BackColor = System.Drawing.Color.Transparent;
+                        button_RunStop.BackColor = System.Drawing.Color.Red;
+                        success = true;
                         break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
-                        Append_Output(">> An error in the calibration data frame.\n"); return;
+                        Append_Output(">> An error in the calibration data frame.\n"); break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_CRCERR:
                         break;
                 }
             }
+
         }
 
         private void trackBar_Horizontal_Scroll(object sender, EventArgs e)
@@ -509,7 +533,7 @@ namespace Final_422
 
         private void button_set_trigger_Click(object sender, EventArgs e)
         {
-            if(button_RunStop.BackColor == System.Drawing.Color.LimeGreen)
+            if (button_RunStop.BackColor == System.Drawing.Color.LimeGreen)
             {
                 OutputLabel.Text = ">> Please turn Scope of first.\n";
                 return;
@@ -518,7 +542,7 @@ namespace Final_422
             if (Globals.Serial.IsOpen)
             {
                 byte Rising_Falling = 1;
-                if(radioButton_falling.Checked)
+                if (radioButton_falling.Checked)
                 {
                     Rising_Falling = 0;
                 }
@@ -563,23 +587,59 @@ namespace Final_422
             double[] Input = new double[values.Count + 2];
             double[] FreqScale = MathNet.Numerics.IntegralTransforms.Fourier.FrequencyScale(200, Globals.SamplingFreq);
             string[] FreqScale_labels = new string[FreqScale.Length];
-            for(int i = 0; i < FreqScale.Length; i++)
+            for (int i = 0; i < FreqScale.Length; i++)
             {
                 FreqScale_labels[i] = FreqScale[i].ToString("F");
             }
             MathNet.Numerics.Complex32[] complex32 = new MathNet.Numerics.Complex32[200];
-            for(int i = 0; i < 200; i++)
+            for (int i = 0; i < 200; i++)
             {
-                complex32[i] =  new MathNet.Numerics.Complex32( Convert.ToSingle((values_Array[i])),0);
+                complex32[i] = new MathNet.Numerics.Complex32(Convert.ToSingle((values_Array[i])), 0);
             }
-            
-            MathNet.Numerics.IntegralTransforms.Fourier.Forward(complex32,MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
+
+            MathNet.Numerics.IntegralTransforms.Fourier.Forward(complex32, MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
 
             for (int i = 0; i < 9; i++)
             {
-                DFT_Values[i] = new ObservablePoint(i ,complex32[i].Magnitude);
+                DFT_Values[i] = new ObservablePoint(i, complex32[i].Magnitude);
+            }
+
+            for (int i = 0; i < 200; i++)
+            {
+                Phase_Values[i] = new ObservablePoint(i, complex32[i].Phase);
             }
             cartesianChart_DFT.AxisX[0].Labels = FreqScale_labels;
+
+            label_Vpp.Text = string.Format("Vpp = {0}", ((values.Max() - values.Min()) / 255.0) * 3.2);
+            List<double> FreqScaleList = new List<double>(FreqScale);
+            int SLI = SecondLargestIndex(complex32);
+            label_Freq.Text = string.Format("Frequency = {0}", Math.Abs(FreqScaleList[SLI]));
+            label_phase.Text = string.Format("Phase = {0}", complex32[SLI].Phase);
+        }
+
+        private static int SecondLargestIndex(MathNet.Numerics.Complex32[] cn)
+        {
+            double[] mag = new double[cn.Length];
+            for (int i = 0; i < cn.Length; i++)
+            {
+                mag[i] = cn[i].Magnitude;
+            }
+            double secondHighest = (from number in mag
+                                    orderby number descending
+                                    select number).Skip(1).First();
+
+            return Array.IndexOf(mag, secondHighest);
+
+        }
+
+        private void trackBar_Vertical_Scroll(object sender, EventArgs e)
+        {
+            cartesianChart1.AxisY[0].MaxValue = 255 / trackBar_Vertical.Value;
+        }
+
+        private void trackBar_offset_Scroll(object sender, EventArgs e)
+        {
+            Globals.Vert_offset = trackBar_Vertical.Value;
         }
     }
 
