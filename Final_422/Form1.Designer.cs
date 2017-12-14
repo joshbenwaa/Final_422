@@ -60,10 +60,11 @@
             this.cartesianChart_DFT = new LiveCharts.WinForms.CartesianChart();
             this.cartesianChart_phase = new LiveCharts.WinForms.CartesianChart();
             this.groupBox_measurements = new System.Windows.Forms.GroupBox();
+            this.label_phase = new System.Windows.Forms.Label();
             this.label_Freq = new System.Windows.Forms.Label();
             this.label_Vpp = new System.Windows.Forms.Label();
-            this.label_phase = new System.Windows.Forms.Label();
             this.trackBar_scale = new System.Windows.Forms.TrackBar();
+            this.trackBar_offset = new System.Windows.Forms.TrackBar();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.OutputGroupBox.SuspendLayout();
@@ -75,6 +76,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_trigger)).BeginInit();
             this.groupBox_measurements.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_scale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_offset)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -357,6 +359,15 @@
             this.groupBox_measurements.TabStop = false;
             this.groupBox_measurements.Text = "Measurements";
             // 
+            // label_phase
+            // 
+            this.label_phase.AutoSize = true;
+            this.label_phase.Location = new System.Drawing.Point(17, 46);
+            this.label_phase.Name = "label_phase";
+            this.label_phase.Size = new System.Drawing.Size(49, 13);
+            this.label_phase.TabIndex = 2;
+            this.label_phase.Text = "Phase = ";
+            // 
             // label_Freq
             // 
             this.label_Freq.AutoSize = true;
@@ -375,18 +386,9 @@
             this.label_Vpp.TabIndex = 0;
             this.label_Vpp.Text = "Vpp =";
             // 
-            // label_phase
-            // 
-            this.label_phase.AutoSize = true;
-            this.label_phase.Location = new System.Drawing.Point(17, 46);
-            this.label_phase.Name = "label_phase";
-            this.label_phase.Size = new System.Drawing.Size(49, 13);
-            this.label_phase.TabIndex = 2;
-            this.label_phase.Text = "Phase = ";
-            // 
             // trackBar_scale
             // 
-            this.trackBar_scale.Location = new System.Drawing.Point(220, 55);
+            this.trackBar_scale.Location = new System.Drawing.Point(12, 235);
             this.trackBar_scale.Maximum = 8;
             this.trackBar_scale.Minimum = 1;
             this.trackBar_scale.Name = "trackBar_scale";
@@ -394,12 +396,25 @@
             this.trackBar_scale.Size = new System.Drawing.Size(45, 104);
             this.trackBar_scale.TabIndex = 45;
             this.trackBar_scale.Value = 1;
+            this.trackBar_scale.Scroll += new System.EventHandler(this.trackBar_scale_Scroll);
+            // 
+            // trackBar_offset
+            // 
+            this.trackBar_offset.Location = new System.Drawing.Point(215, 14);
+            this.trackBar_offset.Maximum = 255;
+            this.trackBar_offset.Minimum = -255;
+            this.trackBar_offset.Name = "trackBar_offset";
+            this.trackBar_offset.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.trackBar_offset.Size = new System.Drawing.Size(45, 363);
+            this.trackBar_offset.TabIndex = 46;
+            this.trackBar_offset.Scroll += new System.EventHandler(this.trackBar_offset_Scroll);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1336, 697);
+            this.Controls.Add(this.trackBar_offset);
             this.Controls.Add(this.trackBar_scale);
             this.Controls.Add(this.groupBox_measurements);
             this.Controls.Add(this.cartesianChart_phase);
@@ -437,6 +452,7 @@
             this.groupBox_measurements.ResumeLayout(false);
             this.groupBox_measurements.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_scale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_offset)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -478,6 +494,7 @@
         private System.Windows.Forms.Label label_Freq;
         private System.Windows.Forms.Label label_phase;
         private System.Windows.Forms.TrackBar trackBar_scale;
+        private System.Windows.Forms.TrackBar trackBar_offset;
     }
 }
 

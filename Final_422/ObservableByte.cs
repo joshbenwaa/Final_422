@@ -28,14 +28,14 @@ namespace LiveCharts.Defaults
     /// <summary>
     /// An already configured chart point, this class notifies the chart to update every time the value property changes
     /// </summary>
-    public class ObservableByte : INotifyPropertyChanged
+    public class ObservableShort : INotifyPropertyChanged
     {
-        private byte _value;
+        private short _value;
 
         /// <summary>
         /// Initializes a new instance of ObservableValue class
         /// </summary>
-        public ObservableByte()
+        public ObservableShort()
         {
 
         }
@@ -44,7 +44,7 @@ namespace LiveCharts.Defaults
         /// Initializes a new instance of ObservableValue class with a given value
         /// </summary>
         /// <param name="value"></param>
-        public ObservableByte(byte value)
+        public ObservableShort(short value)
         {
             Value = value;
         }
@@ -52,7 +52,7 @@ namespace LiveCharts.Defaults
         /// <summary>
         /// Value in the chart
         /// </summary>
-        public byte Value
+        public short Value
         {
             get { return _value; }
             set

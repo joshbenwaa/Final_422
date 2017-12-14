@@ -13,15 +13,12 @@ namespace Final_422
     /// </summary>
     public class Globals
     {
-        public static float Vert_offset = new float();
+        public static byte scale = 1;
+        public static short Vert_offset = new short();
         public static double SamplingFreq = new double();
         public static byte Trigger = new byte();
         public static Int16 NumOfSamples = new short();
         public static UInt16 Period = 0;
-
-        public static Byte offset = 0;
-
-        public static Byte scale = 0;
 
         public static string LPF_100 = @"        9,      7,     -6,    -22,    -18,     14,     49,     38,    -31,
       -96,    -70,     57,    170,    118,   -101,   -284,   -191,    170,

@@ -21,7 +21,7 @@ namespace Final_422
     {
         #region Variables
         public bool connectedflag = false;
-        public ChartValues<ObservableByte> Chart_Values;
+        public ChartValues<ObservableShort> Chart_Values;
         public ChartValues<ObservablePoint> DFT_Values;
         public ChartValues<ObservablePoint> Phase_Values;
         #endregion
@@ -32,12 +32,12 @@ namespace Final_422
         {
 
             InitializeComponent();
-            Chart_Values = new ChartValues<ObservableByte>();
+            Chart_Values = new ChartValues<ObservableShort>();
             DFT_Values = new ChartValues<ObservablePoint>();
             Phase_Values = new ChartValues<ObservablePoint>();
             for (int j = 0; j < 200; j++)
             {
-                Chart_Values.Add(new ObservableByte(0));
+                Chart_Values.Add(new ObservableShort(0));
             }
             for (int k = 0; k < 9; k++)
             {
@@ -47,7 +47,7 @@ namespace Final_422
             {
                 Phase_Values.Add(new ObservablePoint(i, 0));
             }
-            var mapper = Mappers.Xy<ObservableByte>()
+            var mapper = Mappers.Xy<ObservableShort>()
             .X((value, index) => index) //use the index as X
             .Y((value, index) => value.Value); //use the value as Y1
             var DFT_mapper = Mappers.Xy<ObservablePoint>()
@@ -55,7 +55,7 @@ namespace Final_422
             .Y((value, index) => value.Y); //use the value as Y1
 
             //lets save the mapper globally.
-            Charting.For<ObservableByte>(mapper);
+            Charting.For<ObservableShort>(mapper);
             Charting.For<ObservablePoint>(DFT_mapper);
             cartesianChart1.AxisX.Add(new Axis
             {
@@ -401,7 +401,7 @@ namespace Final_422
 
             for (int i = 0; i < values.Count; i++)
             {
-                Chart_Values[i] = new ObservableByte(values[i]);
+                Chart_Values[i] = new ObservableShort((short)(((short)(values[i] / Globals.scale)) + Globals.Vert_offset));
             }
         }
 
@@ -637,9 +637,14 @@ namespace Final_422
             cartesianChart1.AxisY[0].MaxValue = 255 / trackBar_Vertical.Value;
         }
 
+        private void trackBar_scale_Scroll(object sender, EventArgs e)
+        {
+            Globals.scale = (byte)trackBar_scale.Value;
+        }
+
         private void trackBar_offset_Scroll(object sender, EventArgs e)
         {
-            Globals.Vert_offset = trackBar_Vertical.Value;
+            Globals.Vert_offset = (short)trackBar_offset.Value;
         }
     }
 
