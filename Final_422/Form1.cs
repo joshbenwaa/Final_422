@@ -39,7 +39,7 @@ namespace Final_422
             {
                 Chart_Values.Add(new ObservableShort(0));
             }
-            for (int k = 0; k < 100; k++)
+            for (int k = 0; k < 50; k++)
             {
                 DFT_Values.Add(new ObservablePoint(k, 0));
             }
@@ -70,7 +70,7 @@ namespace Final_422
             {
                 Separator = new Separator // force the separator step to 1, so it always display all labels
                 {
-                    Step = 20,
+                    Step = 10,
                     IsEnabled = false //disable it to make it invisible.
                 },
                 DisableAnimations = true,
@@ -601,15 +601,15 @@ namespace Final_422
             {
                 FreqScale_labels[i] = FreqScale[i].ToString("0.0");
             }
-            MathNet.Numerics.Complex32[] complex32 = new MathNet.Numerics.Complex32[200];
+            AForge.Math.Complex[] complex32 = new AForge.Math.Complex[200];
             for (int i = 0; i < 200; i++)
             {
-                complex32[i] = new MathNet.Numerics.Complex32(Convert.ToSingle((values_Array[i])), 0);
+                complex32[i] = new AForge.Math.Complex(Convert.ToSingle((values_Array[i])), 0);
             }
 
-            MathNet.Numerics.IntegralTransforms.Fourier.Forward(complex32, MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
+            AForge.Math.FourierTransform.DFT(complex32,AForge.Math.FourierTransform.Direction.Forward);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 50; i++)
             {
                 DFT_Values[i] = new ObservablePoint(i, 20 * Math.Log10(complex32[i].Magnitude / complex32[SecondLargestIndex(complex32)].Magnitude));
             }
@@ -628,7 +628,7 @@ namespace Final_422
             label_phase.Text = string.Format("Phase = {0}", complex32[SLI].Phase.ToString("0.00"));
         }
 
-        private static int SecondLargestIndex(MathNet.Numerics.Complex32[] cn)
+        private static int SecondLargestIndex(AForge.Math.Complex[] cn)
         {
             double[] mag = new double[cn.Length];
             for (int i = 0; i < cn.Length; i++)
