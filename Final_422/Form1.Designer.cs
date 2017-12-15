@@ -221,9 +221,11 @@
             // 
             this.trackBar_Horizontal.Location = new System.Drawing.Point(6, 19);
             this.trackBar_Horizontal.Maximum = 9;
+            this.trackBar_Horizontal.Minimum = 1;
             this.trackBar_Horizontal.Name = "trackBar_Horizontal";
             this.trackBar_Horizontal.Size = new System.Drawing.Size(107, 45);
             this.trackBar_Horizontal.TabIndex = 32;
+            this.trackBar_Horizontal.Value = 1;
             this.trackBar_Horizontal.Scroll += new System.EventHandler(this.trackBar_Horizontal_Scroll);
             // 
             // groupBox1

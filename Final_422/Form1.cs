@@ -39,7 +39,7 @@ namespace Final_422
             {
                 Chart_Values.Add(new ObservableShort(0));
             }
-            for (int k = 0; k < 9; k++)
+            for (int k = 0; k < 100; k++)
             {
                 DFT_Values.Add(new ObservablePoint(k, 0));
             }
@@ -70,7 +70,7 @@ namespace Final_422
             {
                 Separator = new Separator // force the separator step to 1, so it always display all labels
                 {
-                    Step = 1,
+                    Step = 20,
                     IsEnabled = false //disable it to make it invisible.
                 },
                 DisableAnimations = true,
@@ -81,7 +81,7 @@ namespace Final_422
             {
                 Separator = new Separator // force the separator step to 1, so it always display all labels
                 {
-                    Step = 1,
+                    Step = 20,
                     IsEnabled = false //disable it to make it invisible.
                 },
                 DisableAnimations = true,
@@ -106,8 +106,11 @@ namespace Final_422
             cartesianChart1.AxisY[0].MinValue = 0;
             cartesianChart1.AxisY[0].MaxValue = 255;
 
-            cartesianChart_DFT.Series.Add(new ColumnSeries
+            cartesianChart_DFT.Series.Add(new LineSeries
             {
+                Fill = System.Windows.Media.Brushes.Transparent,
+                PointGeometry = null,
+                LineSmoothness = 0,
                 Values = DFT_Values,
                 Title = "Magnitude"
             });
@@ -250,6 +253,7 @@ namespace Final_422
             TempFreq.cmd = 0x03;
             TempFreq.Data = new List<byte> { hor };
             TempFreq.CreateHDLC();
+            Globals.Serial.DiscardInBuffer();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
         }
@@ -261,6 +265,7 @@ namespace Final_422
             TempFreq.cmd = 0x02;
             TempFreq.Data = TempData;
             TempFreq.CreateHDLC();
+            Globals.Serial.DiscardInBuffer();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
         }
@@ -271,6 +276,7 @@ namespace Final_422
             TempFreq.cmd = 0x04;
             TempFreq.Data = new List<byte>() { trigger, Rising_Falling };
             TempFreq.CreateHDLC();
+            Globals.Serial.DiscardInBuffer();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
         }
@@ -286,6 +292,7 @@ namespace Final_422
             }
             TempFreq.Data = TempData;
             TempFreq.CreateHDLC();
+            Globals.Serial.DiscardInBuffer();
             Globals.Serial.Write(TempFreq.Buffer, 0, TempFreq.Buffer.Length);
             return Aknowledged();
         }
@@ -337,8 +344,8 @@ namespace Final_422
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_OK:
                         //Was a success, add code here
                         Replace_Output(">> trig'd\n");
-                        Plot_Series(DataRx.Data.GetRange(0, 200));
                         Update_SamplingFreqLabel(BitConverter.ToUInt16(DataRx.Data.GetRange(200, 2).ToArray(), 0));
+                        Plot_Series(DataRx.Data.GetRange(0, 200));
                         Calc_And_Plot_DFT(DataRx.Data.GetRange(0, 200));
                         break;
                     case HDLC_Rx.DPA_RX_STATE.DPA_RX_FE:
@@ -398,11 +405,14 @@ namespace Final_422
                 this.Invoke(new Action<List<byte>>(Plot_Series), new object[] { values });
                 return;
             }
-
+            string[] time_labels = new string[200];
             for (int i = 0; i < values.Count; i++)
             {
                 Chart_Values[i] = new ObservableShort((short)(((short)(values[i] / Globals.scale)) + Globals.Vert_offset));
+                time_labels[i] = ((i * (1 / Globals.SamplingFreq)) * 1E3).ToString("0.00");
+
             }
+            cartesianChart1.AxisX[0].Labels = time_labels;
         }
 
         public void Update_SamplingFreqLabel(UInt16 value)
@@ -412,8 +422,8 @@ namespace Final_422
                 this.Invoke(new Action<UInt16>(Update_SamplingFreqLabel), new object[] { value });
                 return;
             }
-            Globals.SamplingFreq = ((1.0 / ((double)value / 200.0)) * 70000000.0);
-            label_SamplingFreq.Text = "Sampling Frequency: " + Globals.SamplingFreq.ToString() + " hz";
+            Globals.SamplingFreq = ((1.0 / ((value * 8) / 220.0)) * 70000000.0);
+            label_SamplingFreq.Text = "Sampling Frequency: " + Globals.SamplingFreq.ToString("0.00") + " hz";
         }
 
         private void SetAxisLimits(int now)
@@ -589,7 +599,7 @@ namespace Final_422
             string[] FreqScale_labels = new string[FreqScale.Length];
             for (int i = 0; i < FreqScale.Length; i++)
             {
-                FreqScale_labels[i] = FreqScale[i].ToString("F");
+                FreqScale_labels[i] = FreqScale[i].ToString("0.0");
             }
             MathNet.Numerics.Complex32[] complex32 = new MathNet.Numerics.Complex32[200];
             for (int i = 0; i < 200; i++)
@@ -599,9 +609,9 @@ namespace Final_422
 
             MathNet.Numerics.IntegralTransforms.Fourier.Forward(complex32, MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 100; i++)
             {
-                DFT_Values[i] = new ObservablePoint(i, complex32[i].Magnitude);
+                DFT_Values[i] = new ObservablePoint(i, 20 * Math.Log10(complex32[i].Magnitude / complex32[SecondLargestIndex(complex32)].Magnitude));
             }
 
             for (int i = 0; i < 200; i++)
@@ -609,12 +619,13 @@ namespace Final_422
                 Phase_Values[i] = new ObservablePoint(i, complex32[i].Phase);
             }
             cartesianChart_DFT.AxisX[0].Labels = FreqScale_labels;
+            cartesianChart_phase.AxisX[0].Labels = FreqScale_labels;
 
-            label_Vpp.Text = string.Format("Vpp = {0}", ((values.Max() - values.Min()) / 255.0) * 3.2);
+            label_Vpp.Text = string.Format("Vpp = {0}", (((values.Max() - values.Min()) / 255.0) * 3.2).ToString("0.00"));
             List<double> FreqScaleList = new List<double>(FreqScale);
             int SLI = SecondLargestIndex(complex32);
-            label_Freq.Text = string.Format("Frequency = {0}", Math.Abs(FreqScaleList[SLI]));
-            label_phase.Text = string.Format("Phase = {0}", complex32[SLI].Phase);
+            label_Freq.Text = string.Format("Frequency = {0}", Math.Abs(FreqScaleList[SLI]).ToString("0.00"));
+            label_phase.Text = string.Format("Phase = {0}", complex32[SLI].Phase.ToString("0.00"));
         }
 
         private static int SecondLargestIndex(MathNet.Numerics.Complex32[] cn)
